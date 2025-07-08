@@ -62,14 +62,26 @@ sensor:
     name: '${name}.battery_vcc'
     id: "VCC"
     accuracy_decimals: 3
-    update_interval: 20s
+    update_interval: 2s
     filters:
-      - multiply: 3.1
+      - multiply: 3.7
+      - median:
+          window_size: 10
+          send_every: 10
 
   - platform: template
     name: '${name}.battery_level'
     unit_of_measurement: '%'
-    update_interval: 20s
+    update_interval: 30s
     # GSheet to adjust the formula : https://docs.google.com/spreadsheets/d/11nqQ33RI-67FxzwYrnD6VhjXXPpyEyggCS_ZL0jhZMQ/edit?usp=sharing
     lambda: |-
-      return ((id(VCC).state * 80.00) - 144.00);
+      float voltage = id(VCC).state;
+      if (voltage >= 3.7) {
+        return 100.0;
+      } else if (voltage > 2.7) {
+        return ((id(VCC).state * 80.00) - 196.00);
+      } else if (voltage > 2.3) {
+        return ((id(VCC).state * 50.00) - 115.00);
+      } else {
+        return 0.0;
+      }
