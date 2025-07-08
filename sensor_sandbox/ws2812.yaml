@@ -1,0 +1,63 @@
+# 1. Modify those variables for your project
+substitutions:
+  name: esphome-ws2812
+  friendly_name: ESPHome WS2812
+  static_ip: 192.168.1.2
+  gateway: 192.168.1.1
+  subnet: 255.255.255.0
+  dns1: 192.168.1.1
+
+# 2. General ESPHome configuration
+esphome:
+  name: ${name}
+  friendly_name: ${name}
+
+# esp32:
+#   board: lolin_c3_mini
+esp8266:
+  board: d1_mini
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret ha_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  manual_ip:
+    static_ip: ${static_ip}
+    gateway: ${gateway}
+    subnet: ${subnet}
+    dns1: ${dns1}
+  # Turn off Wi-Fi when not needed
+  power_save_mode: LIGHT
+  # Directly connects to WiFi network without doing a full scan first
+  fast_connect: True
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: '${name} Fallback Hotspot'
+    password: !secret ota_password
+
+captive_portal:
+
+# 3. I/O and sensors configuration
+
+# Example light component using the WS2812 library
+light:
+  - platform: neopixelbus
+    type: RGB
+    variant: WS2812
+    pin: GPIO7
+    num_leds: 1
+    name: "WS2812 LED"
+    id: ws2812_led
+    
